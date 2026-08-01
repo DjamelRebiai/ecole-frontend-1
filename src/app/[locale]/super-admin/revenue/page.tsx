@@ -58,18 +58,15 @@ export default function RevenuePage() {
           icon={<DollarSign className="h-[22px] w-[22px]" />}
           iconBg="var(--icon-bg-primary)"
           iconColor="var(--primary)"
-          value={loading ? "..." : totalRevenue.toLocaleString()}
+          value={loading ? "..." : `${totalRevenue.toLocaleString()} د.ج`}
           label={t("totalRevenue")}
-          change="د.ج"
         />
         <StatCard
           icon={<TrendingUp className="h-[22px] w-[22px]" />}
           iconBg="var(--icon-bg-success)"
           iconColor="var(--success)"
-          value={loading ? "..." : thisMonthRevenue.toLocaleString()}
+          value={loading ? "..." : `${thisMonthRevenue.toLocaleString()} د.ج`}
           label={t("monthlyRevenue")}
-          change="د.ج"
-          trend="up"
         />
         <StatCard
           icon={<CreditCard className="h-[22px] w-[22px]" />}
@@ -82,9 +79,8 @@ export default function RevenuePage() {
           icon={<Calendar className="h-[22px] w-[22px]" />}
           iconBg="var(--icon-bg-danger)"
           iconColor="var(--danger)"
-          value={loading ? "..." : totalRevenue.toLocaleString()}
+          value={loading ? "..." : `${totalRevenue.toLocaleString()} د.ج`}
           label={t("allTime")}
-          change="د.ج"
         />
       </div>
 

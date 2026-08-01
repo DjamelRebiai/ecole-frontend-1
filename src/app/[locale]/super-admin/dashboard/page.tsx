@@ -25,6 +25,10 @@ export default function SuperAdminDashboardPage() {
   const [schools, setSchools] = useState<SchoolRow[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const lastUpdated = new Date().toLocaleDateString("ar-DZ", {
+    year: "numeric", month: "long", day: "numeric",
+  });
+
   useEffect(() => {
     Promise.all([
       api.get<any>("admin/dashboard"),
@@ -42,7 +46,7 @@ export default function SuperAdminDashboardPage() {
     <div>
       <PageHeader
         title={t("title")}
-        subtitle={t("subtitle")}
+        subtitle={`${t("subtitle")} — آخر تحديث: ${lastUpdated}`}
         actions={
           <Link
             href="/super-admin/schools/new"
@@ -81,10 +85,8 @@ export default function SuperAdminDashboardPage() {
           icon={<DollarSign className="h-[22px] w-[22px]" />}
           iconBg="var(--icon-bg-warning)"
           iconColor="var(--warning)"
-          value={loading ? "..." : (stats?.monthly_revenue ?? 0).toLocaleString()}
+          value={loading ? "..." : `${(stats?.monthly_revenue ?? 0).toLocaleString()} د.ج`}
           label={t("stats.revenue")}
-          change="د.ج"
-          trend="up"
         />
       </div>
 

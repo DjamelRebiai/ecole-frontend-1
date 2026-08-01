@@ -14,6 +14,8 @@ interface School {
   email: string;
   max_students: number;
   is_active: boolean;
+  student_count: number;
+  last_payment_date: string | null;
   platform_subscriptions?: { status: string; platform_subscription_plans?: { name: string } }[];
   created_at: string;
 }
@@ -74,15 +76,15 @@ export default function SchoolsPage() {
                       <td className="border-b border-border px-3 py-3 font-semibold">{s.name}</td>
                       <td className="border-b border-border px-3 py-3 text-muted">{s.email || "-"}</td>
                       <td className="border-b border-border px-3 py-3">{planName}</td>
-                      <td className="border-b border-border px-3 py-3 tabular-nums">{s.max_students || 0}</td>
-                      <td className="border-b border-border px-3 py-3 text-muted">{new Date(s.created_at).toLocaleDateString("ar-DZ")}</td>
+                      <td className="border-b border-border px-3 py-3 tabular-nums">{s.student_count ?? 0}</td>
+                      <td className="border-b border-border px-3 py-3 text-muted">{s.last_payment_date ? new Date(s.last_payment_date).toLocaleDateString("ar-DZ") : "-"}</td>
                       <td className="border-b border-border px-3 py-3">
                         <StatusBadge status={subStatus} />
                       </td>
                       <td className="border-b border-border px-3 py-3">
                         <div className="flex gap-1">
                           <Link href={`/super-admin/schools/${s.id}`} className="inline-flex items-center gap-1.5 rounded border border-border px-2.5 py-1 text-xs text-muted transition hover:border-primary hover:text-primary">عرض</Link>
-                          <button className="inline-flex items-center gap-1.5 rounded border border-border px-2.5 py-1 text-xs text-muted transition hover:border-primary hover:text-primary">تعديل</button>
+                          <Link href={`/super-admin/schools/${s.id}/edit`} className="inline-flex items-center gap-1.5 rounded border border-border px-2.5 py-1 text-xs text-muted transition hover:border-primary hover:text-primary">تعديل</Link>
                         </div>
                       </td>
                     </tr>
