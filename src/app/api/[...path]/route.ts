@@ -2,25 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
-const REFRESH_COOKIE = "ecole_refresh_token";
+const SESSION_COOKIE = "ecole_session";
+const LEGACY_REFRESH_COOKIE = "ecole_refresh_token";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
-function setRefreshCookie(res: NextResponse, token: string) {
-  res.cookies.set(REFRESH_COOKIE, token, {
+const SESSION_COOKIE_OPTS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/",
+  maxAge: COOKIE_MAX_AGE,
+} as const;
+
+function setSessionCookie(res: NextResponse, sessionId: string) {
+  res.cookies.set(SESSION_COOKIE, sessionId, SESSION_COOKIE_OPTS);
+}
+
+function clearSessionCookie(res: NextResponse) {
+  res.cookies.set(SESSION_COOKIE, "", { ...SESSION_COOKIE_OPTS, maxAge: 0 });
+}
+
+function setLegacyRefreshCookie(res: NextResponse, token: string) {
+  res.cookies.set(LEGACY_REFRESH_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    path: "/api/auth",
+    path: "/",
     maxAge: COOKIE_MAX_AGE,
   });
 }
 
-function clearRefreshCookie(res: NextResponse) {
-  res.cookies.set(REFRESH_COOKIE, "", {
+function clearLegacyRefreshCookie(res: NextResponse) {
+  res.cookies.set(LEGACY_REFRESH_COOKIE, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    path: "/api/auth",
+    path: "/",
     maxAge: 0,
   });
 }
@@ -71,31 +88,35 @@ export async function DELETE(
 }
 
 async function handleSession(req: NextRequest) {
-  const refreshToken = req.cookies.get(REFRESH_COOKIE)?.value;
+  const sessionId = req.cookies.get(SESSION_COOKIE)?.value;
+  const legacyRefreshToken = !sessionId ? req.cookies.get(LEGACY_REFRESH_COOKIE)?.value : undefined;
 
-  if (!refreshToken) {
+  if (!sessionId && !legacyRefreshToken) {
     return NextResponse.json(null, { status: 401 });
   }
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
+    const response = await fetch(`${BACKEND_URL}/api/auth/session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
       },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      body: JSON.stringify(
+        sessionId
+          ? { session_id: sessionId }
+          : { legacy_refresh_token: legacyRefreshToken }
+      ),
     });
 
     if (!response.ok) {
       const res = NextResponse.json(null, { status: 401 });
-      clearRefreshCookie(res);
+      clearSessionCookie(res);
+      clearLegacyRefreshCookie(res);
       return res;
     }
 
     const data = await response.json();
-
-    setRefreshCookie(NextResponse.next(), data.refresh_token);
 
     const profileResponse = await fetch(`${BACKEND_URL}/api/auth/profile`, {
       headers: {
@@ -111,12 +132,16 @@ async function handleSession(req: NextRequest) {
       user,
     });
 
-    setRefreshCookie(res, data.refresh_token);
+    if (data.session_id) {
+      setSessionCookie(res, data.session_id);
+    }
+    clearLegacyRefreshCookie(res);
 
     return res;
   } catch {
     const res = NextResponse.json(null, { status: 503 });
-    clearRefreshCookie(res);
+    clearSessionCookie(res);
+    clearLegacyRefreshCookie(res);
     return res;
   }
 }
@@ -172,11 +197,11 @@ async function proxyRequest(
     const isLogin = method === "POST" && path[0] === "auth" && path[1] === "login";
     const isLogout = method === "POST" && path[0] === "auth" && path[1] === "logout";
 
-    if (isLogin && typeof parsed === "object" && parsed && "refresh_token" in (parsed as any)) {
+    if (isLogin && typeof parsed === "object" && parsed && "session_id" in (parsed as any)) {
       const parsedObj = parsed as Record<string, unknown>;
-      const refreshToken = parsedObj.refresh_token as string;
+      const sessionId = parsedObj.session_id as string;
 
-      const { refresh_token: _, ...safeBody } = parsedObj;
+      const { session_id: _sid, refresh_token: _rt, ...safeBody } = parsedObj;
 
       const res = NextResponse.json(safeBody, {
         status: response.status,
@@ -188,23 +213,25 @@ async function proxyRequest(
         },
       });
 
-      setRefreshCookie(res, refreshToken);
+      setSessionCookie(res, sessionId);
       return res;
     }
 
     if (isLogout) {
-      const refreshToken = req.cookies.get(REFRESH_COOKIE)?.value;
+      const sessionId = req.cookies.get(SESSION_COOKIE)?.value;
+      const legacyRefreshToken = req.cookies.get(LEGACY_REFRESH_COOKIE)?.value;
 
-      if (refreshToken) {
-        await fetch(`${BACKEND_URL}/api/auth/logout`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify({ refresh_token: refreshToken }),
-        });
-      }
+      await fetch(`${BACKEND_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          refresh_token: legacyRefreshToken,
+        }),
+      });
 
       const res = NextResponse.json({ message: "Logged out" }, {
         status: 200,
@@ -216,7 +243,8 @@ async function proxyRequest(
         },
       });
 
-      clearRefreshCookie(res);
+      clearSessionCookie(res);
+      clearLegacyRefreshCookie(res);
       return res;
     }
 

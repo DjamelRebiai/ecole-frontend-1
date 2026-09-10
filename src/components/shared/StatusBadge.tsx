@@ -26,6 +26,15 @@ const variantByKey: Record<string, VariantKey> = {
   boarding: "info",
   half_boarding: "warning",
   external: "neutral",
+  open: "success",
+  confirmed: "success",
+  booked: "info",
+  completed: "success",
+  no_show: "danger",
+  waitlist: "warning",
+  frozen: "info",
+  maintenance: "warning",
+  pending_payment: "warning",
 };
 
 export function StatusBadge({

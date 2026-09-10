@@ -2,13 +2,25 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, School, Calendar, CreditCard, LogOut, GraduationCap, DollarSign, MessageCircle } from "lucide-react";
+import {
+  LayoutDashboard,
+  School,
+  Calendar,
+  CreditCard,
+  LogOut,
+  GraduationCap,
+  DollarSign,
+  MessageCircle,
+  Building2,
+} from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/Logo";
 
 const navItems = [
   { key: "dashboard", href: "/super-admin/dashboard", icon: LayoutDashboard },
+  { key: "facilities", href: "/super-admin/facilities", icon: Building2 },
   { key: "schools", href: "/super-admin/schools", icon: School },
   { key: "subscriptions", href: "/super-admin/subscriptions", icon: Calendar },
   { key: "revenue", href: "/super-admin/revenue", icon: DollarSign },
@@ -40,16 +52,22 @@ export function SuperAdminSidebar() {
           "left-0 w-[240px]",
           "md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:!translate-x-0"
+          "md:!translate-x-0",
         )}
       >
         <div className="flex items-center gap-2.5 border-b border-white/8 p-5">
-          <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-lg bg-white/12">
-            <GraduationCap className="h-[22px] w-[22px] fill-white" />
-          </div>
+          <Logo
+            alt="DJO"
+            priority
+            className="h-9 w-auto flex-shrink-0 rounded-lg bg-white p-1"
+          />
           <div>
-            <h2 className="text-base font-bold tracking-tight">{tSuperAdmin("title")}</h2>
-            <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] tracking-wider">{tSuperAdmin("badge")}</span>
+            <h2 className="text-base font-bold tracking-tight">
+              {tSuperAdmin("title")}
+            </h2>
+            <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] tracking-wider">
+              {tSuperAdmin("badge")}
+            </span>
           </div>
         </div>
 
@@ -70,7 +88,7 @@ export function SuperAdminSidebar() {
                   "mb-0.5 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                   active
                     ? "bg-accent text-white"
-                    : "text-white/75 hover:bg-white/8 hover:text-white"
+                    : "text-white/75 hover:bg-white/8 hover:text-white",
                 )}
               >
                 <Icon className="h-[18px] w-[18px] flex-shrink-0" />
@@ -89,7 +107,9 @@ export function SuperAdminSidebar() {
             {tCommon("schoolDashboard")}
           </Link>
           <button
-            onClick={() => { logout().then(() => router.replace("/auth/login")); }}
+            onClick={() => {
+              logout().then(() => router.replace("/auth/login"));
+            }}
             className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-white/60 transition-all hover:bg-white/6 hover:text-white"
           >
             <LogOut className="h-[18px] w-[18px]" />

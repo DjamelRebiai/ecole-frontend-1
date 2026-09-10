@@ -58,47 +58,95 @@
   --icon-bg-danger: rgba(220, 38, 38, 0.2);
 }
 
-/* ===== DECK THEME (Navy + Gold, scoped via [data-deck-theme]) ===== */
+/* ===== GLASS DECK THEME (Glassmorphism Navy + Gold) ===== */
 html[data-deck-theme="dark"] {
-  --deck-bg: #0f1729;
-  --deck-surface: #162040;
-  --deck-surface2: #1d2b52;
-  --deck-surface-elevated: #243362;
-  --deck-border: rgba(200, 180, 140, 0.08);
-  --deck-border-bright: rgba(200, 180, 140, 0.16);
-  --deck-text: #e8e4d8;
-  --deck-text-dim: #9a9484;
+  /* Base background — deep navy for vibrant glass to show through */
+  --deck-bg: #070b16;
+  --deck-bg-aurora-1: #0f1a2e;
+  --deck-bg-aurora-2: #0a1428;
+  /* Glass surfaces — translucent white */
+  --deck-surface: rgba(255, 255, 255, 0.04);
+  --deck-surface2: rgba(255, 255, 255, 0.06);
+  --deck-surface-elevated: rgba(255, 255, 255, 0.09);
+  --deck-surface-solid: #111827;
+  /* Glass borders — hairline light */
+  --deck-border: rgba(255, 255, 255, 0.06);
+  --deck-border-bright: rgba(255, 255, 255, 0.14);
+  --deck-border-accent: rgba(212, 167, 58, 0.32);
+  /* Text */
+  --deck-text: #f0ebe0;
+  --deck-text-dim: #a39d8c;
+  --deck-text-bright: #ffffff;
+  /* Brand accent — gold */
   --deck-accent: #d4a73a;
-  --deck-accent-dim: rgba(212, 167, 58, 0.1);
+  --deck-accent-bright: #e8bc4e;
+  --deck-accent-dim: rgba(212, 167, 58, 0.12);
+  --deck-accent-glow: rgba(212, 167, 58, 0.45);
+  /* Semantic colors */
   --deck-green: #4ade80;
   --deck-green-dim: rgba(74, 222, 128, 0.1);
   --deck-red: #f87171;
   --deck-red-dim: rgba(248, 113, 113, 0.1);
   --deck-blue: #60a5fa;
   --deck-blue-dim: rgba(96, 165, 250, 0.1);
-  --deck-code-bg: #0a0f1e;
-  --deck-code-text: #d4d0c4;
+  /* Glass effects */
+  --deck-blur: 20px;
+  --deck-blur-strong: 30px;
+  --deck-blur-subtle: 12px;
+  --deck-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+  --deck-shadow-md: 0 8px 40px rgba(0, 0, 0, 0.35);
+  --deck-shadow-glow: 0 0 40px var(--deck-accent-dim);
+  --deck-shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  /* Blob colors */
+  --blob-gold: rgba(212, 167, 58, 0.12);
+  --blob-blue: rgba(96, 165, 250, 0.08);
+  --blob-green: rgba(74, 222, 128, 0.06);
+  --blob-violet: rgba(139, 92, 246, 0.06);
 }
 
 html[data-deck-theme="light"] {
-  --deck-bg: #faf8f2;
-  --deck-surface: #ffffff;
-  --deck-surface2: #f5f0e6;
-  --deck-surface-elevated: #fffdf5;
-  --deck-border: rgba(30, 30, 50, 0.08);
-  --deck-border-bright: rgba(30, 30, 50, 0.16);
+  /* Base background — warm neutral for subtle glass */
+  --deck-bg: #f4f1ea;
+  --deck-bg-aurora-1: #faf8f2;
+  --deck-bg-aurora-2: #efece4;
+  /* Glass surfaces — translucent white */
+  --deck-surface: rgba(255, 255, 255, 0.55);
+  --deck-surface2: rgba(255, 255, 255, 0.7);
+  --deck-surface-elevated: rgba(255, 255, 255, 0.85);
+  --deck-surface-solid: #ffffff;
+  /* Glass borders */
+  --deck-border: rgba(30, 30, 50, 0.06);
+  --deck-border-bright: rgba(30, 30, 50, 0.12);
+  --deck-border-accent: rgba(184, 134, 11, 0.28);
+  /* Text */
   --deck-text: #1a1814;
   --deck-text-dim: #6e685c;
+  --deck-text-bright: #0a0908;
+  /* Brand accent */
   --deck-accent: #b8860b;
-  --deck-accent-dim: rgba(184, 134, 11, 0.08);
+  --deck-accent-bright: #d4a73a;
+  --deck-accent-dim: rgba(184, 134, 11, 0.1);
+  --deck-accent-glow: rgba(184, 134, 11, 0.35);
+  /* Semantic */
   --deck-green: #16a34a;
   --deck-green-dim: rgba(22, 163, 74, 0.08);
   --deck-red: #dc2626;
   --deck-red-dim: rgba(220, 38, 38, 0.08);
   --deck-blue: #2563eb;
   --deck-blue-dim: rgba(37, 99, 235, 0.08);
-  --deck-code-bg: #2a2520;
-  --deck-code-text: #e8e4d8;
+  /* Glass effects */
+  --deck-blur: 20px;
+  --deck-blur-strong: 30px;
+  --deck-blur-subtle: 12px;
+  --deck-shadow: 0 4px 30px rgba(30, 30, 50, 0.08);
+  --deck-shadow-md: 0 8px 40px rgba(30, 30, 50, 0.12);
+  --deck-shadow-glow: 0 0 40px var(--deck-accent-dim);
+  --deck-shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  /* Blob colors */
+  --blob-gold: rgba(184, 134, 11, 0.1);
+  --blob-blue: rgba(37, 99, 235, 0.06);
+  --blob-green: rgba(22, 163, 74, 0.05);
+  --blob-violet: rgba(139, 92, 246, 0.05);
 }
 
 html:not([data-scroll-behavior]) {

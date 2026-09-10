@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
-import { GraduationCap, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  GraduationCap,
+  Dumbbell,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { GuestGuard } from "@/components/layout/AuthGuard";
 import { Link } from "@/i18n/routing";
 import { api } from "@/lib/api/client";
+import { Logo } from "@/components/ui/Logo";
+
+type ServiceType = "school" | "sports_hall";
 
 export default function RegisterPage() {
   const t = useTranslations("auth");
@@ -15,8 +24,9 @@ export default function RegisterPage() {
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const [serviceType, setServiceType] = useState<ServiceType>("school");
   const [name, setName] = useState("");
-  const [schoolName, setSchoolName] = useState("");
+  const [facilityName, setFacilityName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,7 +38,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (!name || !schoolName || !email || !password) {
+    if (!name || !facilityName || !email || !password) {
       setError(t("errors.required"));
       return;
     }
@@ -66,7 +76,14 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await api.post("auth/register", { name, schoolName, email, password });
+      await api.post("auth/register", {
+        name,
+        facilityName,
+        email,
+        password,
+        service_type: serviceType,
+        ...(serviceType === "school" ? { schoolName: facilityName } : {}),
+      });
       setSuccess(true);
       setTimeout(() => router.push("/auth/login"), 2000);
     } catch (err: unknown) {
@@ -79,38 +96,65 @@ export default function RegisterPage() {
 
   return (
     <GuestGuard>
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-primary to-primary-dark p-5">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -end-36 -top-52 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(5,150,105,0.12)_0%,transparent_70%)]" />
-          <div className="absolute -bottom-24 -start-24 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(5,150,105,0.08)_0%,transparent_70%)]" />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-5">
+        <div className="absolute inset-0">
+          <Image
+            src="/ecole1.png"
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="100vw"
+            className={`object-cover transition-all duration-700 ease-in-out ${
+              serviceType === "school" ? "scale-100 opacity-100" : "scale-110 opacity-0"
+            }`}
+          />
+          <Image
+            src="/create-a-premium-fitness-advertisement-featuring-a1.png"
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="100vw"
+            className={`object-cover transition-all duration-700 ease-in-out ${
+              serviceType === "sports_hall" ? "scale-100 opacity-100" : "scale-110 opacity-0"
+            }`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/55 to-black/70" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[420px] rounded-2xl bg-surface p-8 shadow-[var(--shadow-lg)] md:p-10">
+        <div className="relative z-10 my-6 w-full max-w-[460px] rounded-3xl border border-white/30 bg-white/10 p-8 shadow-[0_8px_40px_rgba(0,0,0,0.45)] backdrop-blur-2xl md:p-10">
           <div className="absolute end-4 top-4">
             <LanguageSwitcher />
           </div>
 
           <div className="mb-2 text-center">
-            <div className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-[14px] bg-primary">
-              <GraduationCap className="h-7 w-7 fill-white text-white" />
+            <div className="mx-auto mb-4 inline-flex h-20 w-20 items-center justify-center rounded-2xl border border-white/40 bg-white/90 p-2 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+              <Logo alt="DJO" priority className="h-full w-auto" />
             </div>
-            <h1 className="text-[22px] font-bold tracking-tight text-fg">
+            <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">
               {locale === "ar" ? "إنشاء حساب جديد" : "Create Account"}
             </h1>
-            <p className="text-sm text-muted">
-              {locale === "ar" ? "سجل مؤسستك في المنصة" : "Register your school on the platform"}
+            <p className="mt-1 text-sm text-white/80">
+              {locale === "ar"
+                ? "سجل مؤسستك (مدرسة أو قاعة رياضية) في المنصة"
+                : "Register your institution (school or sports hall) on the platform"}
             </p>
           </div>
 
           {success && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-success/30 bg-[var(--icon-bg-success)] px-3.5 py-2.5 text-sm text-success">
+            <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3.5 py-2.5 text-sm text-emerald-100 backdrop-blur-md">
               <CheckCircle className="h-4 w-4 flex-shrink-0" />
-              <span>{locale === "ar" ? "تم التسجيل بنجاح! جارٍ تحويلك إلى صفحة الدخول..." : "Registration successful! Redirecting to login..."}</span>
+              <span>
+                {locale === "ar"
+                  ? "تم التسجيل بنجاح! جارٍ تحويلك إلى صفحة الدخول..."
+                  : "Registration successful! Redirecting to login..."}
+              </span>
             </div>
           )}
 
           {error && !success && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-[var(--icon-bg-danger)] px-3.5 py-2.5 text-sm text-danger">
+            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 px-3.5 py-2.5 text-sm text-red-100 backdrop-blur-md">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
@@ -119,37 +163,87 @@ export default function RegisterPage() {
           {!success && (
             <form onSubmit={handleSubmit} noValidate>
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-semibold text-fg">
+                <label className="mb-1.5 block text-sm font-semibold text-white/90">
+                  {locale === "ar" ? "نوع المؤسسة" : "Institution Type"}
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setServiceType("school")}
+                    className={`flex flex-col items-center gap-2 rounded-xl border-[1.5px] px-4 py-4 text-sm font-semibold backdrop-blur-md transition-all ${
+                      serviceType === "school"
+                        ? "border-emerald-300 bg-emerald-500/25 text-white shadow-[0_4px_16px_rgba(16,185,129,0.3)]"
+                        : "border-white/30 bg-white/10 text-white/70 hover:border-white/60 hover:bg-white/15"
+                    }`}
+                  >
+                    <GraduationCap className="h-6 w-6" />
+                    {locale === "ar" ? "مدرسة" : "School"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setServiceType("sports_hall")}
+                    className={`flex flex-col items-center gap-2 rounded-xl border-[1.5px] px-4 py-4 text-sm font-semibold backdrop-blur-md transition-all ${
+                      serviceType === "sports_hall"
+                        ? "border-emerald-300 bg-emerald-500/25 text-white shadow-[0_4px_16px_rgba(16,185,129,0.3)]"
+                        : "border-white/30 bg-white/10 text-white/70 hover:border-white/60 hover:bg-white/15"
+                    }`}
+                  >
+                    <Dumbbell className="h-6 w-6" />
+                    {locale === "ar" ? "قاعة رياضية" : "Sports Hall"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="mb-1.5 block text-sm font-semibold text-white/90">
                   {locale === "ar" ? "الاسم الكامل" : "Full Name"}
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={locale === "ar" ? "أحمد بن علي" : "Ahmed Ben Ali"}
+                  placeholder={
+                    locale === "ar" ? "أحمد بن علي" : "Ahmed Ben Ali"
+                  }
                   required
                   disabled={loading}
-                  className="w-full rounded-lg border-[1.5px] border-border bg-bg px-3.5 py-3 text-[15px] text-fg outline-none transition-all focus:border-accent focus:ring-2 focus:ring-[rgba(5,150,105,0.1)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-white/30 bg-white/15 px-3.5 py-3 text-[15px] text-white placeholder:text-white/50 outline-none transition-all backdrop-blur-md focus:border-accent focus:bg-white/20 focus:ring-2 focus:ring-white/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-semibold text-fg">
-                  {locale === "ar" ? "اسم المؤسسة" : "School Name"}
+                <label className="mb-1.5 block text-sm font-semibold text-white/90">
+                  {serviceType === "school"
+                    ? locale === "ar"
+                      ? "اسم المدرسة"
+                      : "School Name"
+                    : locale === "ar"
+                      ? "اسم القاعة الرياضية"
+                      : "Sports Hall Name"}
                 </label>
                 <input
                   type="text"
-                  value={schoolName}
-                  onChange={(e) => setSchoolName(e.target.value)}
-                  placeholder={locale === "ar" ? "مدرسة الفلاح" : "Al Falah School"}
+                  value={facilityName}
+                  onChange={(e) => setFacilityName(e.target.value)}
+                  placeholder={
+                    serviceType === "school"
+                      ? locale === "ar"
+                        ? "مدرسة الفلاح"
+                        : "Al Falah School"
+                      : locale === "ar"
+                        ? "قاعة الأبطال"
+                        : "Champions Hall"
+                  }
                   required
                   disabled={loading}
-                  className="w-full rounded-lg border-[1.5px] border-border bg-bg px-3.5 py-3 text-[15px] text-fg outline-none transition-all focus:border-accent focus:ring-2 focus:ring-[rgba(5,150,105,0.1)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-white/30 bg-white/15 px-3.5 py-3 text-[15px] text-white placeholder:text-white/50 outline-none transition-all backdrop-blur-md focus:border-accent focus:bg-white/20 focus:ring-2 focus:ring-white/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-semibold text-fg">{t("email")}</label>
+                <label className="mb-1.5 block text-sm font-semibold text-white/90">
+                  {t("email")}
+                </label>
                 <input
                   type="email"
                   value={email}
@@ -158,12 +252,14 @@ export default function RegisterPage() {
                   required
                   autoComplete="email"
                   disabled={loading}
-                  className="w-full rounded-lg border-[1.5px] border-border bg-bg px-3.5 py-3 text-[15px] text-fg outline-none transition-all focus:border-accent focus:ring-2 focus:ring-[rgba(5,150,105,0.1)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-white/30 bg-white/15 px-3.5 py-3 text-[15px] text-white placeholder:text-white/50 outline-none transition-all backdrop-blur-md focus:border-accent focus:bg-white/20 focus:ring-2 focus:ring-white/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-semibold text-fg">{t("password")}</label>
+                <label className="mb-1.5 block text-sm font-semibold text-white/90">
+                  {t("password")}
+                </label>
                 <input
                   type="password"
                   value={password}
@@ -173,42 +269,53 @@ export default function RegisterPage() {
                   minLength={8}
                   autoComplete="new-password"
                   disabled={loading}
-                  className="w-full rounded-lg border-[1.5px] border-border bg-bg px-3.5 py-3 text-[15px] text-fg outline-none transition-all focus:border-accent focus:ring-2 focus:ring-[rgba(5,150,105,0.1)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-white/30 bg-white/15 px-3.5 py-3 text-[15px] text-white placeholder:text-white/50 outline-none transition-all backdrop-blur-md focus:border-accent focus:bg-white/20 focus:ring-2 focus:ring-white/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
 
               <div className="mb-5">
-                <label className="mb-1.5 block text-sm font-semibold text-fg">
+                <label className="mb-1.5 block text-sm font-semibold text-white/90">
                   {locale === "ar" ? "تأكيد كلمة المرور" : "Confirm Password"}
                 </label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder={locale === "ar" ? "أعد إدخال كلمة المرور" : "Re-enter password"}
+                  placeholder={
+                    locale === "ar"
+                      ? "أعد إدخال كلمة المرور"
+                      : "Re-enter password"
+                  }
                   required
                   minLength={8}
                   autoComplete="new-password"
                   disabled={loading}
-                  className="w-full rounded-lg border-[1.5px] border-border bg-bg px-3.5 py-3 text-[15px] text-fg outline-none transition-all focus:border-accent focus:ring-2 focus:ring-[rgba(5,150,105,0.1)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-white/30 bg-white/15 px-3.5 py-3 text-[15px] text-white placeholder:text-white/50 outline-none transition-all backdrop-blur-md focus:border-accent focus:bg-white/20 focus:ring-2 focus:ring-white/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-accent px-4 py-3 text-base font-semibold text-white transition-all hover:bg-accent-dark hover:shadow-[var(--shadow-lg)] disabled:opacity-70"
+                className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 text-base font-semibold text-white shadow-[0_4px_20px_rgba(16,185,129,0.5)] transition-all hover:from-emerald-400 hover:to-emerald-500 hover:shadow-[0_6px_28px_rgba(16,185,129,0.65)] disabled:opacity-70"
               >
                 {loading
-                  ? (locale === "ar" ? "جارٍ التسجيل..." : "Registering...")
-                  : (locale === "ar" ? "إنشاء الحساب" : "Create Account")}
+                  ? locale === "ar"
+                    ? "جارٍ التسجيل..."
+                    : "Registering..."
+                  : locale === "ar"
+                    ? "إنشاء الحساب"
+                    : "Create Account"}
               </button>
             </form>
           )}
 
-          <div className="mt-5 text-center text-[13px] text-muted">
+          <div className="mt-5 text-center text-[13px] text-white/80">
             {locale === "ar" ? "لديك حساب بالفعل؟" : "Already have an account?"}{" "}
-            <Link href="/auth/login" className="font-semibold text-accent hover:underline">
+            <Link
+              href="/auth/login"
+              className="font-semibold text-emerald-300 hover:underline"
+            >
               {locale === "ar" ? "تسجيل الدخول" : "Sign in"}
             </Link>
           </div>

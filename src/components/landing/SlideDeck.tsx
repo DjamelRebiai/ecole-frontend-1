@@ -3,7 +3,114 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
+import {
+  GraduationCap,
+  ClipboardList,
+  CalendarClock,
+  Wallet,
+  BedDouble,
+  CheckSquare,
+  ShieldCheck,
+  Shield,
+  Lock,
+  Server,
+  Database,
+  Plug,
+  Languages,
+  Check,
+  X,
+  ArrowDown,
+} from "lucide-react";
 import "./slide-deck.css";
+
+import type { LucideIcon } from "lucide-react";
+
+const kpis = [
+  { start: 0, end: 24, prefix: "", suffix: "", labelKey: "kpi_1", trendKey: "kpi_1_trend", color: "var(--deck-accent)" },
+  { start: 0, end: 2847, prefix: "", suffix: "", labelKey: "kpi_2", trendKey: "kpi_2_trend", color: "var(--deck-green)" },
+  { start: 0, end: 124, prefix: "", suffix: "", labelKey: "kpi_3", trendKey: "kpi_3_trend", color: "var(--deck-blue)" },
+  { start: 0, end: 38.4, prefix: "$", suffix: "K", labelKey: "kpi_4", trendKey: "kpi_4_trend", color: "var(--deck-accent)" },
+];
+
+const features = [
+  { icon: GraduationCap, titleKey: "feat_1_title", descKey: "feat_1_desc" },
+  { icon: ClipboardList, titleKey: "feat_2_title", descKey: "feat_2_desc" },
+  { icon: CalendarClock, titleKey: "feat_3_title", descKey: "feat_3_desc" },
+  { icon: Wallet, titleKey: "feat_4_title", descKey: "feat_4_desc" },
+  { icon: BedDouble, titleKey: "feat_5_title", descKey: "feat_5_desc" },
+  { icon: CheckSquare, titleKey: "feat_6_title", descKey: "feat_6_desc" },
+];
+
+const cred = [
+  { icon: Shield, titleKey: "cred_1_title", descKey: "cred_1_desc" },
+  { icon: Lock, titleKey: "cred_2_title", descKey: "cred_2_desc" },
+  { icon: Server, titleKey: "cred_3_title", descKey: "cred_3_desc" },
+  { icon: Database, titleKey: "cred_4_title", descKey: "cred_4_desc" },
+  { icon: Plug, titleKey: "cred_5_title", descKey: "cred_5_desc" },
+  { icon: Languages, titleKey: "cred_6_title", descKey: "cred_6_desc" },
+];
+
+const trustItems = ["trust_1", "trust_2", "trust_3", "trust_4"];
+
+const plans = [
+  { nameKey: "pricing_1_name", studentsKey: "pricing_1_students", priceKey: "pricing_1_price", periodKey: "pricing_1_period", featKeys: ["pricing_1_feat_1", "pricing_1_feat_2", "pricing_1_feat_3"], featured: false, tagKey: null },
+  { nameKey: "pricing_2_name", studentsKey: "pricing_2_students", priceKey: "pricing_2_price", periodKey: "pricing_2_period", featKeys: ["pricing_2_feat_1", "pricing_2_feat_2", "pricing_2_feat_3"], featured: true, tagKey: "pricing_2_tag" },
+  { nameKey: "pricing_3_name", studentsKey: "pricing_3_students", priceKey: "pricing_3_price", periodKey: "pricing_3_period", featKeys: ["pricing_3_feat_1", "pricing_3_feat_2", "pricing_3_feat_3", "pricing_3_feat_4"], featured: false, tagKey: null },
+];
+
+const compareRows = [1, 2, 3, 4, 5, 6].map((n) => ({
+  featureKey: `compare_row_${n}`,
+  tradKey: `compare_trad_${n}`,
+  ecoleKey: `compare_ecole_${n}`,
+}));
+
+function CountUp({
+  end,
+  prefix = "",
+  suffix = "",
+  decimals = 0,
+  active,
+  locale,
+}: {
+  end: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  active: boolean;
+  locale: string;
+}) {
+  const [value, setValue] = useState(0);
+  const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const animate = active && !reduced;
+
+  useEffect(() => {
+    if (!animate) return;
+    const duration = 1400;
+    const startTime = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(end * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [animate, end]);
+
+  const shown = animate ? value : end;
+
+  return (
+    <span>
+      {prefix}
+      {shown.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+      {suffix}
+    </span>
+  );
+}
 
 export default function SlideDeck() {
   const t = useTranslations("landing");
@@ -12,7 +119,7 @@ export default function SlideDeck() {
   const deckRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const total = 11;
+  const total = 14;
 
   useEffect(() => {
     const prefersLight = window.matchMedia?.("(prefers-color-scheme: light)").matches;
@@ -98,6 +205,14 @@ export default function SlideDeck() {
 
   return (
     <>
+      {/* Animated glass background */}
+      <div className="deck-bg" aria-hidden="true">
+        <div className="deck-blob deck-blob--1" />
+        <div className="deck-blob deck-blob--2" />
+        <div className="deck-blob deck-blob--3" />
+        <div className="deck-blob deck-blob--4" />
+      </div>
+
       <div className="deck-progress" style={{ width: `${((current + 1) / total) * 100}%` }} />
       <div className="deck-dots">
         {Array.from({ length: total }).map((_, i) => (
@@ -129,8 +244,20 @@ export default function SlideDeck() {
             <p className="slide__subtitle" style={{ marginTop: "clamp(16px,2vh,32px)", maxWidth: 640 }}>{t("subtitle")}</p>
           </div>
           <div className="reveal-item" style={{ marginTop: "clamp(24px,4vh,48px)", display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-            <a href="/auth/login" className="deck-cta deck-cta--primary">{t("cta_start")} →</a>
-            <a href="/auth/login" className="deck-cta deck-cta--outline">{t("cta_demo")}</a>
+            <Link href="/auth/register" className="deck-cta deck-cta--primary">{t("cta_start")} →</Link>
+            <button onClick={() => goTo(8)} className="deck-cta deck-cta--outline">{t("cta_demo")}</button>
+          </div>
+          <div className="slide__trust reveal-item">
+            {trustItems.map((key, i) => (
+              <div key={i} className="slide__trust-item">
+                <ShieldCheck size={16} strokeWidth={2} />
+                <span>{t(key)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="slide__scroll-hint reveal-item" aria-hidden="true">
+            <span>{t("scroll_hint")}</span>
+            <ArrowDown size={16} strokeWidth={2} />
           </div>
         </section>
 
@@ -148,7 +275,7 @@ export default function SlideDeck() {
         </section>
 
         {/* ===== SLIDE 3: DIVIDER — THE NUMBERS ===== */}
-        <section className="slide slide--divider" style={{ backgroundImage: "radial-gradient(ellipse at 80% 60%, var(--deck-accent-dim) 0%, transparent 40%)" }}>
+        <section className="slide slide--divider">
           <span className="slide__number">01</span>
           <div>
             <h2 className="slide__heading reveal-item">{t("divider_1")}</h2>
@@ -157,18 +284,15 @@ export default function SlideDeck() {
         </section>
 
         {/* ===== SLIDE 4: DASHBOARD / KPI ===== */}
-        <section className="slide slide--dashboard" style={{ backgroundImage: "radial-gradient(ellipse at 70% 30%, var(--deck-accent-dim) 0%, transparent 40%)" }}>
+        <section className="slide slide--dashboard">
           <p className="slide__label reveal-item">01 · {t("kpi_label")}</p>
           <h2 className="slide__heading reveal-item" style={{ marginBottom: "clamp(12px,2vh,28px)" }}>{t("kpi_title")}</h2>
           <div className="slide__kpis">
-            {[
-              { val: "24", labelKey: "kpi_1", trendKey: "kpi_1_trend", color: "var(--deck-accent)" },
-              { val: "2,847", labelKey: "kpi_2", trendKey: "kpi_2_trend", color: "var(--deck-green)" },
-              { val: "124", labelKey: "kpi_3", trendKey: "kpi_3_trend", color: "var(--deck-blue)" },
-              { val: "$38.4K", labelKey: "kpi_4", trendKey: "kpi_4_trend", color: "var(--deck-accent)" },
-            ].map((k, i) => (
+            {kpis.map((k, i) => (
               <div key={i} className="slide__kpi reveal-item">
-                <div className="slide__kpi-val" style={{ color: k.color }}>{k.val}</div>
+                <div className="slide__kpi-val" style={{ color: k.color }}>
+                  <CountUp active={current === 3} end={k.end} prefix={k.prefix} suffix={k.suffix} locale={locale} />
+                </div>
                 <div className="slide__kpi-label">{t(k.labelKey)}</div>
                 <div className="slide__kpi-trend" style={{ color: "var(--deck-green)" }}>{t(k.trendKey)}</div>
               </div>
@@ -177,7 +301,7 @@ export default function SlideDeck() {
         </section>
 
         {/* ===== SLIDE 5: DIVIDER — THE SOLUTION ===== */}
-        <section className="slide slide--divider" style={{ backgroundImage: "radial-gradient(ellipse at 30% 40%, var(--deck-accent-dim) 0%, transparent 40%)" }}>
+        <section className="slide slide--divider">
           <span className="slide__number">02</span>
           <div>
             <h2 className="slide__heading reveal-item">{t("divider_2")}</h2>
@@ -212,7 +336,7 @@ export default function SlideDeck() {
         </section>
 
         {/* ===== SLIDE 7: DIVIDER — THE MODULES ===== */}
-        <section className="slide slide--divider" style={{ backgroundImage: "radial-gradient(ellipse at 60% 50%, var(--deck-accent-dim) 0%, transparent 40%)" }}>
+        <section className="slide slide--divider">
           <span className="slide__number">03</span>
           <div>
             <h2 className="slide__heading reveal-item">{t("divider_3")}</h2>
@@ -221,28 +345,63 @@ export default function SlideDeck() {
         </section>
 
         {/* ===== SLIDE 8: FEATURES GRID ===== */}
-        <section className="slide slide--features" style={{ backgroundImage: "radial-gradient(ellipse at 15% 80%, var(--deck-accent-dim) 0%, transparent 40%)" }}>
+        <section className="slide slide--features">
           <h2 className="slide__heading reveal-item">{t("features_title")}</h2>
           <div className="slide__features">
-            {[
-              { icon: "🏫", titleKey: "feat_1_title", descKey: "feat_1_desc" },
-              { icon: "📋", titleKey: "feat_2_title", descKey: "feat_2_desc" },
-              { icon: "⏰", titleKey: "feat_3_title", descKey: "feat_3_desc" },
-              { icon: "💰", titleKey: "feat_4_title", descKey: "feat_4_desc" },
-              { icon: "🛏️", titleKey: "feat_5_title", descKey: "feat_5_desc" },
-              { icon: "✅", titleKey: "feat_6_title", descKey: "feat_6_desc" },
-            ].map((f, i) => (
-              <div key={i} className="slide__feature reveal-item">
-                <div className="slide__feature-icon" style={{ fontSize: 18 }}>{f.icon}</div>
-                <div className="slide__feature-title">{t(f.titleKey)}</div>
-                <div className="slide__feature-desc">{t(f.descKey)}</div>
-              </div>
-            ))}
+            {features.map((f, i) => {
+              const Icon = f.icon as LucideIcon;
+              return (
+                <div key={i} className="slide__feature reveal-item">
+                  <div className="slide__feature-icon">
+                    <Icon size={18} strokeWidth={2} />
+                  </div>
+                  <div className="slide__feature-title">{t(f.titleKey)}</div>
+                  <div className="slide__feature-desc">{t(f.descKey)}</div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* ===== SLIDE 9: CHART ===== */}
-        <section className="slide slide--chart" style={{ backgroundImage: "radial-gradient(ellipse at 75% 75%, var(--deck-accent-dim) 0%, transparent 40%)" }}>
+        {/* ===== SLIDE 9: COMPARISON TABLE ===== */}
+        <section className="slide slide--compare">
+          <div className="slide__inner-col">
+            <p className="slide__label reveal-item">04 · {t("compare_label")}</p>
+            <h2 className="slide__heading reveal-item">{t("compare_title")}</h2>
+            <div className="compare-scroll reveal-item">
+              <table className="compare-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{t("compare_col_feature")}</th>
+                    <th scope="col" className="compare-table__vo">{t("compare_col_traditional")}</th>
+                    <th scope="col" className="compare-table__hero">{t("compare_col_ecole")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareRows.map((row, i) => (
+                    <tr key={i}>
+                      <th scope="row">{t(row.featureKey)}</th>
+                      <td className="no"><span className="compare-table__cell"><X size={14} strokeWidth={2} /><span>{t(row.tradKey)}</span></span></td>
+                      <td className="yes"><span className="compare-table__cell"><Check size={14} strokeWidth={2} /><span>{t(row.ecoleKey)}</span></span></td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="compare-table__cta">
+                    <td></td>
+                    <td className="no"></td>
+                    <td className="compare-table__cta-cell">
+                      <Link href="/auth/register" className="deck-cta--compare">{t("cta_start")} →</Link>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== SLIDE 10: CHART ===== */}
+        <section className="slide slide--chart">
           <h2 className="slide__heading reveal-item">{t("chart_title")}</h2>
           <div className="chart-wrap reveal-item">
             <div className="bar-chart" aria-label={t("chart_title")}>
@@ -260,32 +419,104 @@ export default function SlideDeck() {
           <p className="slide__subtitle reveal-item" style={{ marginTop: "clamp(8px,1.5vh,16px)" }}>{t("chart_subtitle")}</p>
         </section>
 
-        {/* ===== SLIDE 10: QUOTE ===== */}
-        <section className="slide slide--quote" style={{ backgroundImage: "radial-gradient(ellipse at 50% 50%, var(--deck-accent-dim) 0%, transparent 35%)" }}>
-          <div className="slide__quote-mark reveal-item">&ldquo;</div>
-          <blockquote className="reveal-item">{t("quote_text")}</blockquote>
-          <cite className="reveal-item">{t("quote_author")}</cite>
+        {/* ===== SLIDE 12: CREDIBILITY / TRUST ===== */}
+        <section className="slide slide--cred">
+          <p className="slide__label reveal-item">05 · {t("cred_label")}</p>
+          <h2 className="slide__heading reveal-item" style={{ marginBottom: "clamp(12px,2vh,24px)" }}>{t("cred_title")}</h2>
+          <div className="slide__cred">
+            {cred.map((c, i) => {
+              const Icon = c.icon as LucideIcon;
+              return (
+                <div key={i} className="slide__cred-card reveal-item">
+                  <div className="slide__feature-icon">
+                    <Icon size={18} strokeWidth={2} />
+                  </div>
+                  <div className="slide__feature-title">{t(c.titleKey)}</div>
+                  <div className="slide__feature-desc">{t(c.descKey)}</div>
+                </div>
+              );
+            })}
+          </div>
         </section>
 
-        {/* ===== SLIDE 11: FULL-BLEED CTA ===== */}
+        {/* ===== SLIDE 13: PRICING ===== */}
+        <section className="slide slide--pricing">
+          <div className="slide__inner-col">
+            <p className="slide__label reveal-item">06 · {t("pricing_label")}</p>
+            <h2 className="slide__heading reveal-item">{t("pricing_title")}</h2>
+            <p className="slide__subtitle reveal-item" style={{ marginTop: 8, marginBottom: "clamp(12px,2vh,24px)", textTransform: "none", letterSpacing: 0.5 }}>{t("pricing_sub")}</p>
+            <div className="slide__plans">
+              {plans.map((p, i) => (
+                <div key={i} className={`slide__plan reveal-item ${p.featured ? "slide__plan--featured" : ""}`}>
+                  <div className="slide__plan-head">
+                    <div className={`slide__plan-name ${p.featured ? "slide__plan-name--featured" : ""}`}>{t(p.nameKey)}</div>
+                    {p.tagKey && <span className="slide__plan-tag">{t(p.tagKey)}</span>}
+                  </div>
+                  <div className="slide__plan-price">{t(p.priceKey)}</div>
+                  <div className="slide__plan-students">{t(p.studentsKey)}</div>
+                  <div className="slide__plan-period">{t(p.periodKey)}</div>
+                  <ul className="slide__plan-feats">
+                    {p.featKeys.map((fk, j) => (
+                      <li key={j}><Check size={14} strokeWidth={2} />{t(fk)}</li>
+                    ))}
+                  </ul>
+                  <Link href="/auth/register" className={`deck-cta ${p.featured ? "deck-cta--primary" : "deck-cta--outline"} slide__plan-cta`}>{t("cta_start")} →</Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ===== SLIDE 14: FAQ ===== */}
+        <section className="slide slide--faq">
+          <div className="slide__inner-col slide__inner-col--wide">
+            <p className="slide__label reveal-item">07 · {t("faq_label")}</p>
+            <h2 className="slide__heading reveal-item" style={{ marginBottom: "clamp(12px,2vh,24px)" }}>{t("faq_title")}</h2>
+            <div className="slide__faq">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <details key={n} className="slide__faq-item reveal-item">
+                  <summary>{t(`faq_${n}_q`)}</summary>
+                  <p>{t(`faq_${n}_a`)}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ===== SLIDE 15: FULL-BLEED CTA ===== */}
         <section className="slide slide--bleed">
           <div className="slide__bg--gradient" />
           <div className="slide__scrim" />
           <div className="slide__content">
-            <p className="slide__label reveal-item" style={{ color: "rgba(255,255,255,0.6)" }}>05 · {t("bleed_label")}</p>
+            <p className="slide__label reveal-item" style={{ color: "rgba(255,255,255,0.6)" }}>08 · {t("bleed_label")}</p>
             <h2 className="slide__heading reveal-item">{t("bleed_title")}</h2>
             <p className="slide__subtitle reveal-item" style={{ color: "rgba(255,255,255,0.6)", marginTop: 12 }}>{t("bleed_subtitle")}</p>
             <div className="reveal-item" style={{ marginTop: "clamp(24px,4vh,48px)", display: "flex", gap: 12, flexWrap: "wrap" }}>
               <input type="email" placeholder={t("bleed_placeholder")}
                 style={{
-                  flex: 1, minWidth: 220, padding: "14px 20px", borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)",
+                  flex: 1, minWidth: 220, padding: "14px 20px", borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(255,255,255,0.08)",
+                  backdropFilter: "blur(12px) saturate(140%)",
+                  WebkitBackdropFilter: "blur(12px) saturate(140%)",
                   color: "#fff", fontSize: 15, outline: "none",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
+                  transition: "all 0.25s ease",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "rgba(212, 167, 58, 0.5)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 167, 58, 0.12), inset 0 1px 0 rgba(255,255,255,0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "rgba(255,255,255,0.18)";
+                  e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.1)";
                 }}
               />
-              <a href="/auth/login" className="deck-cta deck-cta--primary">{t("cta_start")} →</a>
+              <Link href="/auth/register" className="deck-cta deck-cta--primary">{t("bleed_register")} →</Link>
             </div>
-            <p className="slide__subtitle reveal-item" style={{ color: "rgba(255,255,255,0.4)", marginTop: 12, fontSize: 12 }}>{t("bleed_note")}</p>
+            <p className="slide__subtitle reveal-item" style={{ color: "rgba(255,255,255,0.4)", marginTop: 12, fontSize: 12 }}>
+              {t("bleed_note")} · <ShieldCheck size={12} strokeWidth={2} style={{ verticalAlign: -2 }} /> {t("bleed_trust")}
+            </p>
           </div>
         </section>
 

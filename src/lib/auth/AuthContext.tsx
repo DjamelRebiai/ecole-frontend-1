@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from "react";
 import { api, setApiToken } from "@/lib/api/client";
 
 interface AuthUser {
@@ -10,6 +18,11 @@ interface AuthUser {
   school_id: string | null;
   school_name: string | null;
   is_super_admin: boolean;
+  // ─── Multi-service fields ───
+  facility_id: string | null;
+  facility_name: string | null;
+  service_type: "school" | "sports_hall" | string | null;
+  facility_user_id?: string | null;
 }
 
 interface AuthContextType {
@@ -24,7 +37,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 const SESSION_DURATION_MS = 50 * 60 * 1000;
 
-async function fetchSessionToken(): Promise<{ access_token: string; user: AuthUser } | null> {
+async function fetchSessionToken(): Promise<{
+  access_token: string;
+  user: AuthUser;
+} | null> {
   try {
     const res = await fetch("/api/auth/session", {
       credentials: "include",
@@ -35,6 +51,23 @@ async function fetchSessionToken(): Promise<{ access_token: string; user: AuthUs
   } catch {
     return null;
   }
+}
+
+let inFlightSession: Promise<{
+  access_token: string;
+  user: AuthUser;
+} | null> | null = null;
+
+function getSessionToken(): Promise<{
+  access_token: string;
+  user: AuthUser;
+} | null> {
+  if (!inFlightSession) {
+    inFlightSession = fetchSessionToken().finally(() => {
+      inFlightSession = null;
+    });
+  }
+  return inFlightSession;
 }
 
 async function logoutOnServer(): Promise<void> {
@@ -76,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     refreshTimer.current = setInterval(async () => {
       try {
-        const session = await fetchSessionToken();
+        const session = await getSessionToken();
         if (session) {
           currentTokenRef.current = session.access_token;
           setApiToken(session.access_token);
@@ -92,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [doLogout]);
 
   useEffect(() => {
-    fetchSessionToken().then((session) => {
+    getSessionToken().then((session) => {
       if (session) {
         currentTokenRef.current = session.access_token;
         setApiToken(session.access_token);
@@ -108,19 +141,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [startRefreshTimer]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await api.post<{
-      access_token: string;
-      user: AuthUser;
-    }>("auth/login", { email, password });
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const res = await api.post<{
+        access_token: string;
+        user: AuthUser;
+      }>("auth/login", { email, password });
 
-    currentTokenRef.current = res.access_token;
-    setApiToken(res.access_token);
-    setToken(res.access_token);
-    setUser(res.user);
-    startRefreshTimer();
-    return res.user;
-  }, [startRefreshTimer]);
+      currentTokenRef.current = res.access_token;
+      setApiToken(res.access_token);
+      setToken(res.access_token);
+      setUser(res.user);
+      startRefreshTimer();
+      return res.user;
+    },
+    [startRefreshTimer],
+  );
 
   const logout = useCallback(async () => {
     if (logoutInProgress.current) return;

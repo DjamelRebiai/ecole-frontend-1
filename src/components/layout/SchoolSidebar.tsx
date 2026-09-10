@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, Users, Home, DollarSign, CalendarCheck, BedDouble, UserCog, StickyNote, Contact, Settings, LogOut, GraduationCap, Presentation, BookOpen, Calendar } from "lucide-react";
+import { LayoutDashboard, Users, Home, DollarSign, CalendarCheck, BedDouble, UserCog, StickyNote, Contact, Settings, LogOut, Presentation, BookOpen, Calendar } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/Logo";
 
 const navItems = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -51,9 +52,11 @@ export function SchoolSidebar({ mobileOpen, onMenuClick }: { mobileOpen?: boolea
         )}
       >
       <div className="flex items-center gap-3 border-b border-border p-5">
-        <div className="grid h-[42px] w-[42px] flex-shrink-0 place-items-center rounded-xl bg-primary">
-          <GraduationCap className="h-[22px] w-[22px] fill-white" />
-        </div>
+        <Logo
+          alt={user?.school_name || "DJO"}
+          priority
+          className="h-10 w-auto flex-shrink-0 rounded-lg bg-white p-1"
+        />
         <div>
           <h2 className="text-[15px] font-bold leading-tight tracking-tight">
             {user?.school_name || user?.email?.split("@")[0] || "..."}

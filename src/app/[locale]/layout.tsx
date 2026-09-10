@@ -40,7 +40,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "منصة إدارة المدارس — School Management Platform",
   description: "حل متكامل لإدارة المؤسسات التعليمية الخاصة",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.png", apple: "/apple-icon.png" },
 };
 
 export function generateStaticParams() {
@@ -65,7 +65,7 @@ export default async function LocaleLayout({
   const isRTL = locale === "ar";
 
   return (
-    <html lang={locale} dir={isRTL ? "rtl" : "ltr"} className={`${cairo.variable} ${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}>
+    <html lang={locale} dir={isRTL ? "rtl" : "ltr"} data-scroll-behavior="smooth" className={`${cairo.variable} ${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider><AuthWrapper>{children}</AuthWrapper></ThemeProvider>

@@ -8,6 +8,7 @@ import { AcademicYearSelector } from "./AcademicYearSelector";
 import { ThemeToggle } from "@/contexts/ThemeContext";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { Link } from "@/i18n/routing";
+import { Logo } from "@/components/ui/Logo";
 
 interface HeaderProps {
   pageTitle: string;
@@ -51,10 +52,10 @@ export function Header({ pageTitle, onMenuClick, showMenuButton, hideYearSelecto
           </Link>
         )}
         <div
-          className="grid cursor-pointer place-items-center rounded-full bg-accent text-sm font-bold text-white"
-          style={{ width: 34, height: 34 }}
+          className="grid h-8 w-8 cursor-pointer flex-shrink-0 place-items-center overflow-hidden rounded-lg bg-white ring-1 ring-border"
+          title="DJO"
         >
-          AF
+          <Logo alt="DJO" className="h-full w-auto" />
         </div>
         <button
           onClick={logout}

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { notificationsApi } from "@/lib/api";
 import { Link } from "@/i18n/routing";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 // ─── Types ───────────────────────────────────────────────
 interface NotificationItem {
@@ -77,6 +78,8 @@ function timeAgo(dateStr: string): string {
 
 // ─── Main Component ──────────────────────────────────────
 export function NotificationBell() {
+  const { user } = useAuth();
+  const isSchoolUser = user?.service_type === "school" || !!user?.school_id;
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -126,11 +129,13 @@ export function NotificationBell() {
 
   // ─── Initial load ──────────────────────────────────────
   useEffect(() => {
-    fetchUnreadCount();
-  }, [fetchUnreadCount]);
+    if (isSchoolUser) fetchUnreadCount();
+  }, [fetchUnreadCount, isSchoolUser]);
 
   // ─── Polling كل 30 ثانية ──────────────────────────────
   useEffect(() => {
+    if (!isSchoolUser) return;
+
     pollingRef.current = setInterval(() => {
       fetchUnreadCount();
     }, 30000);
@@ -138,13 +143,13 @@ export function NotificationBell() {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [fetchUnreadCount]);
+  }, [fetchUnreadCount, isSchoolUser]);
 
   // ─── فتح/غلق القائمة ──────────────────────────────────
   const toggleDropdown = async () => {
     if (!isOpen) {
       await fetchNotifications(1);
-      fetchUnreadCount(); // تحديث العدد فوراً
+      if (isSchoolUser) fetchUnreadCount(); // تحديث العدد فوراً
     }
     setIsOpen(!isOpen);
   };
@@ -197,6 +202,8 @@ export function NotificationBell() {
   };
 
   // ─── Render ────────────────────────────────────────────
+  if (!isSchoolUser) return null;
+
   return (
     <div ref={dropdownRef} className="relative">
       {/* زر الجرس */}
